@@ -19,6 +19,7 @@ Key architecture decisions:
 """
 
 import logging
+import uuid
 from decimal import Decimal
 
 from django.conf import settings
@@ -340,6 +341,7 @@ class CheckoutView(APIView):
 
                 # ── Step 5: Create Order ───────────────────────────────────────
                 order = Order.objects.create(
+                    razorpay_receipt=f"rst_{uuid.uuid4().hex}",
                     user=request.user if request.user.is_authenticated else None,
                     first_name=first_name,
                     last_name=last_name,
@@ -421,7 +423,7 @@ class CheckoutView(APIView):
         # Frontend can show a "Retry Payment" option.
         try:
             from payments.razorpay_client import create_order as razorpay_create_order
-            rzp_order = razorpay_create_order(total_amount)
+            rzp_order = razorpay_create_order(total_amount, receipt=order.razorpay_receipt)
             order.razorpay_order_id = rzp_order['id']
             order.save(update_fields=['razorpay_order_id'])
         except Exception as rzp_exc:

@@ -114,6 +114,9 @@ class Order(models.Model):
     )
 
     # ── Razorpay ──────────────────────────────────────────────────────────────
+    razorpay_receipt = models.CharField(
+        max_length=40, unique=True, null=True, blank=True, editable=False,
+    )
     razorpay_order_id = models.CharField(
         max_length=100, unique=True, null=True, blank=True
     )
