@@ -21,7 +21,7 @@ def _get_client() -> razorpay.Client:
     return razorpay.Client(auth=(key_id, key_secret))
 
 
-def create_order(amount, currency: str = 'INR') -> dict:
+def create_order(amount, currency: str = 'INR', *, receipt: str | None = None) -> dict:
     """
     Create a Razorpay order. amount can be Decimal, float, or int (in rupees).
     Returns the full Razorpay order dict including 'id', 'amount', 'currency'.
@@ -30,11 +30,14 @@ def create_order(amount, currency: str = 'INR') -> dict:
         amount = float(amount)
     amount_paise = int(round(amount * 100))
     client = _get_client()
-    rzp_order = client.order.create({
+    payload = {
         'amount': amount_paise,
         'currency': currency,
         'payment_capture': 1,  # auto-capture
-    })
+    }
+    if receipt:
+        payload['receipt'] = receipt
+    rzp_order = client.order.create(payload)
     logger.info("Razorpay order created: %s (₹%s)", rzp_order['id'], amount)
     return rzp_order
 
